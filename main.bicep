@@ -15,6 +15,11 @@ param sqlServerName string = ''
 param sqlDbName string = ''
 param userObjectId string = '00000000-0000-0000-0000-000000000000'
 param sqlServerLogin string = ''
+param appServicePlanName string = ''
+param appServicePlanSku string = ''
+param appServiceName string = ''
+param appServiceLinuxFxVersion string = ''
+param appServiceWindowsFxVersion string = ''
 
 @secure()
 param sqlServerPassword string = ''
@@ -29,6 +34,29 @@ module rg './modules/resourcegroup.bicep' = {
   }
 }
 
+module appserviceplanwindows './modules/appserviceplanwindows.bicep' = {
+  name: appServicePlanName
+  scope: resourceGroup(rg.name)
+  params: {
+    appServicePlanName: appServicePlanName
+    location: 'northeurope'
+    sku: appServicePlanSku
+    tags: globalTags
+  }
+}
+
+module appservicewindows './modules/appservicewindows.bicep' = {
+  name: appServiceName
+  scope: resourceGroup(rg.name)
+  params: {
+    appServiceName: appServiceName
+    location: 'northeurope'
+    windowsFxVersion: appServiceWindowsFxVersion
+    appServicePlanName: appserviceplanwindows.name
+    tags: globalTags
+  }
+}
+
 module keyvault './modules/keyvault.bicep' = {
   name: keyVaultName
   scope: resourceGroup(rg.name)
@@ -38,7 +66,8 @@ module keyvault './modules/keyvault.bicep' = {
     tenantId: subscription().tenantId
     objectId: userObjectId
     secretsPermissions: [
-      'list', 'get'
+      //'list', 'get'
+      'all'
     ]
     tags: globalTags
   }
@@ -66,4 +95,3 @@ module sqldatabase './modules/sqldatabase.bicep' = {
     tags: globalTags
   }
 }
-

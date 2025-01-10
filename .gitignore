@@ -1,1 +1,3 @@
 parameters/projektauftrag.bicepparam
+modules/appservicewindows.bicep
+modules/appserviceplanwindows.bicep
